@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36908.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskPlanner.API", "TaskPlanner.API\TaskPlanner.API.csproj", "{54AE2F37-DA73-4FCF-8E89-ED1D371291EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskPlanner.Client", "TaskPlanner.Client\TaskPlanner.Client.csproj", "{8E17E9D0-9A4D-4F7C-900C-6AAE53935B23}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54AE2F37-DA73-4FCF-8E89-ED1D371291EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54AE2F37-DA73-4FCF-8E89-ED1D371291EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54AE2F37-DA73-4FCF-8E89-ED1D371291EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54AE2F37-DA73-4FCF-8E89-ED1D371291EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E17E9D0-9A4D-4F7C-900C-6AAE53935B23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E17E9D0-9A4D-4F7C-900C-6AAE53935B23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E17E9D0-9A4D-4F7C-900C-6AAE53935B23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E17E9D0-9A4D-4F7C-900C-6AAE53935B23}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7E1D92A0-1199-4840-B042-CE353EB15947}
+	EndGlobalSection
+EndGlobal

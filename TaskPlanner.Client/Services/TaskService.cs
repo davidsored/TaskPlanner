@@ -24,5 +24,15 @@ namespace TaskPlanner.Client.Services
             await _http.PostAsJsonAsync("api/categorias", categoria);
         }
 
+        public async Task<List<Tarea>> GetTareas()
+        {
+            return await _http.GetFromJsonAsync<List<Tarea>>("api/tareas");
+        }
+
+        public async Task SaveTarea(Tarea tarea)
+        {
+            await _http.PostAsJsonAsync("api/tareas", tarea);
+        }
+
     }
 }

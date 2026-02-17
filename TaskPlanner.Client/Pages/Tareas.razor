@@ -13,10 +13,13 @@
 				<InputDate class="form-control" @bind-Value="nuevaTarea.FechaInicio"></InputDate>
 				<InputSelect class="form-control" @bind-Value="nuevaTarea.CategoriaId">
 					<option value="0">-- Selecciona --</option>
-					@foreach(var cat in categorias)
-					{
-						<option value="@cat.Id">@cat.Nombre</option>
-					}					
+					@if (categorias != null)
+					{						
+						@foreach (var cat in categorias)
+						{
+							<option value="@cat.Id">@cat.Nombre</option>
+						}
+					}										
 				</InputSelect>
 				<button type="submit" class="btn btn-success">Guardar</button>
 			</div>
@@ -36,6 +39,7 @@ else
 				<td>Título</td>
 				<td>Fecha</td>
 				<td>Categoría</td>
+				<td>Acciones</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -45,6 +49,31 @@ else
 					<td>@t.Titulo</td>
 					<td>@t.FechaInicio.ToShortDateString()</td>
 					<td>@t.Categoria?.Nombre</td>
+					<td>
+						<div class="dropdown">
+
+							<button class="btn btn-link text-dark text-decoration-none"
+									type="button"
+									data-bs-toggle="dropdown"
+									aria-expanded="false">
+								&#x22EE;
+							</button>
+
+							<ul class="dropdown-menu">
+
+								<li><button class="dropdown-item" type="button">Editar</button></li>
+
+								<li>
+									<button class="dropdown-item text-danger"
+											type="button"
+											@onclick="@(() => Borrar(t.Id))">
+										Eliminar
+									</button>
+								</li>
+
+							</ul>
+						</div>
+					</td>
 				</tr>
 			}
 		</tbody>
@@ -69,6 +98,13 @@ else
 		await Service.SaveTarea(nuevaTarea);
 
 		nuevaTarea = new Tarea();
+
+		tareas = await Service.GetTareas();
+	}
+
+	private async Task Borrar(int id)
+	{
+		await Service.DeleteTarea(id);
 
 		tareas = await Service.GetTareas();
 	}

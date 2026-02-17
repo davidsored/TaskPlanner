@@ -31,5 +31,19 @@ namespace TaskPlanner.API.Controllers
 
             return Ok(nuevaTarea);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> EliminarTarea(int id)
+        {
+            var tarea = await _context.Tareas.FindAsync(id);
+            if (tarea == null) 
+            {
+                return NotFound();
+            }
+                
+            _context.Tareas.Remove(tarea);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }

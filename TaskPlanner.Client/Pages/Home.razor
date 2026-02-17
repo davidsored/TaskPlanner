@@ -1,7 +1,243 @@
 ﻿@page "/"
+@using TaskPlanner.Client.Models;
+@using TaskPlanner.Client.Services;
+@inject TaskService Service;
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard Semanal</PageTitle>
 
-<h1>Hello, world!</h1>
+<h3>Mi Semana</h3>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTarea">
+    + Nueva Tarea
+</button>
 
-Welcome to your new app.
+@if (tareas == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col border-end">
+                <h5 class="text-center bg-light p-2">
+                    Lunes <br />
+                    <span style="font-size: 0.8rem; color: #666;">
+                        @lunesDeEstaSemana.ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Monday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col border-end">
+                <h5 class="text-center bg-light p-2">
+                    Martes <br />
+                    <span style="font-size: 0.8rem; color: #666">
+						@lunesDeEstaSemana.AddDays(1).ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Tuesday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col border-end">
+                <h5 class="text-center bg-light p-2">
+                    Miércoles <br />
+                    <span style="font-size: 0.8rem; color: #666">
+                        @lunesDeEstaSemana.AddDays(2).ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Wednesday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col border-end">
+                <h5 class="text-center bg-light p-2">
+                    Jueves <br />
+                    <span style="font-size: 0.8rem; color: #666">
+                        @lunesDeEstaSemana.AddDays(3).ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Thursday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col">
+                <h5 class="text-center bg-light p-2">
+                    Viernes <br />
+                    <span style="font-size: 0.8rem; color: #666">
+                        @lunesDeEstaSemana.AddDays(4).ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Friday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col border-end">
+                <h5 class="text-center bg-light p-2">
+                    Sábado <br />
+                    <span style="font-size: 0.8rem; color: #666">
+                        @lunesDeEstaSemana.AddDays(5).ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Saturday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col border-end">
+                <h5 class="text-center bg-light p-2">
+                    Domingo <br />
+                    <span style="font-size: 0.8rem; color: #666">
+                        @lunesDeEstaSemana.AddDays(6).ToShortDateString()
+                    </span>
+                </h5>
+                @foreach (var t in GetTareasPorDia(DayOfWeek.Sunday))
+                {
+                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                        <div class="card-body p-2">
+                            <strong>@t.Titulo</strong><br />
+                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+
+
+}
+
+<div class="modal fade" id="modalTarea" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Nueva Tarea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <EditForm Model=@nuevaTarea OnValidSubmit=@CrearTarea>
+                        <div class="mb-3">
+                            <label>Título</label>
+                            <InputText class="form-control" @bind-Value="nuevaTarea.Titulo" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Fecha</label>
+                            <InputDate class="form-control" @bind-Value="nuevaTarea.FechaInicio" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Categoría</label>
+                            <InputSelect class="form-control" @bind-Value="nuevaTarea.CategoriaId">
+                                <option value="0">-- Selecciona --</option>
+                                @if (categorias != null)
+                                {
+                                    @foreach (var cat in categorias)
+                                    {
+                                        <option value="@cat.Id">@cat.Nombre</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal">
+                            Guardar Tarea
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Tarea>? tareas;
+    private List<Categoria>? categorias;
+    private Tarea nuevaTarea = new Tarea { FechaInicio = DateTime.Today };
+    private DateTime lunesDeEstaSemana;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tareas = await Service.GetTareas();
+        categorias = await Service.GetCategorias();
+
+        CalcularInicioSemana();
+    }
+
+    private void CalcularInicioSemana()
+    {
+        DateTime hoy = DateTime.Today;
+
+        int diasHastaLunes = ((int)hoy.DayOfWeek - (int)DayOfWeek.Monday);
+
+        if (diasHastaLunes < 0) diasHastaLunes += 7;
+
+        lunesDeEstaSemana = hoy.AddDays(-diasHastaLunes);
+    }
+
+    private IEnumerable<Tarea> GetTareasPorDia(DayOfWeek dia)
+    {
+        if (tareas == null) return new List<Tarea>();
+
+        int diasASumar = ((int)dia - (int)DayOfWeek.Monday);
+        if (diasASumar < 0) diasASumar += 7; 
+
+        DateTime fechaDeLaColumna = lunesDeEstaSemana.AddDays(diasASumar);
+
+        return tareas.Where(t => t.FechaInicio.Date == fechaDeLaColumna.Date);
+    }
+
+    private async Task CrearTarea()
+    {
+        await Service.SaveTarea(nuevaTarea);
+
+        nuevaTarea = new Tarea  { FechaInicio = DateTime.Today };
+
+        tareas = await Service.GetTareas();
+    }
+}

@@ -34,5 +34,10 @@ namespace TaskPlanner.Client.Services
             await _http.PostAsJsonAsync("api/tareas", tarea);
         }
 
+        public async Task DeleteTarea(int id)
+        {
+            await _http.DeleteAsync($"api/tareas/{id}");
+        }
+
     }
 }

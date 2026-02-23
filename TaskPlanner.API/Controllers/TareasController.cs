@@ -45,5 +45,20 @@ namespace TaskPlanner.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> EditarTarea(int id, Tarea tareaActualizada)
+        {
+            if (id != tareaActualizada.Id)
+            {
+                return BadRequest("El ID no coincide");
+            }
+
+            _context.Entry(tareaActualizada).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

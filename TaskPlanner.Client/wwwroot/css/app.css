@@ -113,3 +113,31 @@ code {
         transform: scale(1.02);
         cursor: pointer;
     }
+
+.rounded-circle {
+    transition: transform 0.2s, outline 0.2s;
+    cursor: pointer;
+}
+
+.ring-active {
+    outline: 3px solid #333; 
+    outline-offset: 2px; 
+    transform: scale(1.1); 
+}
+
+.fab-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 30px;
+    line-height: 1; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; 
+}

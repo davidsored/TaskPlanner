@@ -6,18 +6,22 @@ namespace TaskPlanner.Client.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "El título es obligatorio")]
         public string Titulo { get; set; } = string.Empty;
 
         public string Descripcion { get; set; } = string.Empty;
 
+        [Required]
         public DateTime FechaInicio { get; set; }
 
+        [Required]
         public DateTime FechaFin { get; set; }
 
-        public int CategoriaId { get; set; }
+        [Required(ErrorMessage = "Debes elegir un color")]
+        public string? ColorHex { get; set; }
+
+        public int? CategoriaId { get; set; }
 
         public Categoria? Categoria { get; set; }
-
     }
 }

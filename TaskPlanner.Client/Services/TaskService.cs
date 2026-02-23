@@ -31,7 +31,14 @@ namespace TaskPlanner.Client.Services
 
         public async Task SaveTarea(Tarea tarea)
         {
-            await _http.PostAsJsonAsync("api/tareas", tarea);
+            if(tarea.Id == 0)
+            {
+                await _http.PostAsJsonAsync("api/tareas", tarea);
+            }
+            else
+            {
+                await _http.PutAsJsonAsync($"api/tareas/{tarea.Id}", tarea);
+            }    
         }
 
         public async Task DeleteTarea(int id)

@@ -6,9 +6,8 @@ namespace TaskPlanner.API.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "El nombre de la categoría es obligatorio")]
         public string Nombre { get; set; } = string.Empty;
 
-        public string ColorHex { get; set; } = "#FFFFFF";
     }
 }

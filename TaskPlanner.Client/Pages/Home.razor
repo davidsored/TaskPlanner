@@ -2,12 +2,13 @@
 @using TaskPlanner.Client.Models;
 @using TaskPlanner.Client.Services;
 @inject TaskService Service;
+@inject IJSRuntime JS;
 
 <PageTitle>Dashboard Semanal</PageTitle>
 
 <h3>Mi Semana</h3>
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTarea">
-    + Nueva Tarea
+<button type="button" class="btn btn-primary fab-button" data-bs-toggle="modal" data-bs-target="#modalTarea" @onclick="PrepararNuevaTarea">
+    +
 </button>
 
 @if (tareas == null)
@@ -28,10 +29,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Monday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -46,10 +50,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Tuesday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -64,10 +71,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Wednesday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -82,10 +92,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Thursday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -100,10 +113,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Friday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -118,10 +134,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Saturday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -136,10 +155,13 @@ else
                 </h5>
                 @foreach (var t in GetTareasPorDia(DayOfWeek.Sunday))
                 {
-                    <div class="card mb-2 text-white" style="background-color: @(t.Categoria?.ColorHex ?? "#ccc")">
+                    <div class="card mb-2 text-white shadow-sm"
+                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
+                         data-bs-toggle="modal" data-bs-target="#modalTarea"
+                         @onclick="() => SeleccionarTarea(t)">
                         <div class="card-body p-2">
                             <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToShortTimeString()</small>
+                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
                         </div>
                     </div>
                 }
@@ -158,22 +180,43 @@ else
                 <h5 class="modal-title" id="exampleModalLabel">Nueva Tarea</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
-                <div class="modal-body">
-                    <EditForm Model=@nuevaTarea OnValidSubmit=@CrearTarea>
-                        <div class="mb-3">
-                            <label>Título</label>
-                            <InputText class="form-control" @bind-Value="nuevaTarea.Titulo" />
-                        </div>
+                <EditForm Model=@nuevaTarea OnValidSubmit=@CrearTarea>
+                    <DataAnnotationsValidator />
 
-                        <div class="mb-3">
-                            <label>Fecha</label>
-                            <InputDate class="form-control" @bind-Value="nuevaTarea.FechaInicio" />
-                        </div>
+                    <div class="mb-3">
+                        <label>Título</label>
+                        <InputText class="form-control" @bind-Value="nuevaTarea.Titulo" />
+                        <ValidationMessage For="@(() => nuevaTarea.Titulo)" />
+                    </div>
 
-                        <div class="mb-3">
-                            <label>Categoría</label>
-                            <InputSelect class="form-control" @bind-Value="nuevaTarea.CategoriaId">
+                    <div class="mb-3 bg-light p-3 rounded border shadow-sm">
+                        <label class="form-label fw-bold">Horario</label>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="small text-muted">Día de la tarea</label>
+                                <InputDate class="form-control form-control-sm" @bind-Value="nuevaTarea.FechaInicio" />
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted">Hora Inicio</label>
+                                <input type="time" class="form-control form-control-sm"
+                                       value="@nuevaTarea.FechaInicio.ToString("HH:mm")"
+                                       @onchange="SetHoraInicio" />
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted">Hora Fin</label>
+                                <input type="time" class="form-control form-control-sm"
+                                       value="@nuevaTarea.FechaFin.ToString("HH:mm")"
+                                       @onchange="SetHoraFin" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Categoría</label>
+                        <div class="input-group">
+                            <InputSelect class="form-select" @bind-Value="nuevaTarea.CategoriaId">
                                 <option value="0">-- Selecciona --</option>
                                 @if (categorias != null)
                                 {
@@ -183,13 +226,58 @@ else
                                     }
                                 }
                             </InputSelect>
+                            <button class="btn btn-outline-secondary" type="button" @onclick="NuevaCategoria" title="Crear nueva categoría">
+                                <i class="bi bi-plus-lg">+</i>
+                            </button>
                         </div>
 
-                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal">
+                        @if (mostrarNuevaCat)
+                        {
+                            <div class="input-group mt-2 shadow-sm">
+                                <input type="text" class="form-control form-control-sm" placeholder="Nombre de la nueva categoría..." @bind="nombreCatNueva" />
+                                <button class="btn btn-sm btn-primary" type="button" @onclick="GuardarCategoria">
+                                    Guardar Categoría
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Color (Obligatorio)</label>
+                        <div class="d-flex gap-2 p-2 border rounded align-items-center">
+                            @foreach (var color in new[] { "#0d6efd", "#ee4444", "#22cc66", "#ff8822", "#aa66ff", "#22cccc" })
+                            {
+                                <button type="button"
+                                        class="rounded-circle border-0 shadow-sm"
+                                        style="width: 30px; height: 30px; background-color: @color; cursor: pointer; transform: scale(@(nuevaTarea.ColorHex == color ? 1.2 : 1)); border: 2px solid @(nuevaTarea.ColorHex == color ? "#333" : "transparent")"
+                                        @onclick="() => nuevaTarea.ColorHex = color">
+                                </button>
+                            }
+                            <div class="ms-2 border-start ps-3">
+                                <input type="color"
+                                       class="border-0 shadow-sm"
+                                       style="width: 35px; height: 35px; cursor: pointer; padding: 0; background: none; border-radius: 4px;"
+                                       title="Elegir otro color"
+                                       @bind="nuevaTarea.ColorHex" />
+                            </div>
+                        </div>
+                        <div class="text-danger small mt-1">
+                            <ValidationMessage For="@(() => nuevaTarea.ColorHex)" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        @if (nuevaTarea.Id != 0)
+                        {
+                            <button type="button" class="btn btn-danger w-50 shadow-sm" @onclick="EliminarTarea">
+                                <i class="bi bi-trash"></i> Borrar
+                            </button>
+                        }
+                        <button type="submit" class="btn btn-success flex-grow-1 shadow-sm">
                             Guardar Tarea
                         </button>
-                    </EditForm>
-                </div>
+                    </div>
+                </EditForm>
             </div>
         </div>
     </div>
@@ -200,6 +288,8 @@ else
     private List<Categoria>? categorias;
     private Tarea nuevaTarea = new Tarea { FechaInicio = DateTime.Today };
     private DateTime lunesDeEstaSemana;
+    private bool mostrarNuevaCat = false;
+    private string nombreCatNueva = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -229,15 +319,87 @@ else
 
         DateTime fechaDeLaColumna = lunesDeEstaSemana.AddDays(diasASumar);
 
-        return tareas.Where(t => t.FechaInicio.Date == fechaDeLaColumna.Date);
+        return tareas.Where(t => t.FechaInicio.Date == fechaDeLaColumna.Date).OrderBy(t => t.FechaInicio);
     }
 
     private async Task CrearTarea()
     {
         await Service.SaveTarea(nuevaTarea);
 
-        nuevaTarea = new Tarea  { FechaInicio = DateTime.Today };
+        nuevaTarea = new Tarea { FechaInicio = DateTime.Today, FechaFin = DateTime.Today.AddHours(1) };
 
         tareas = await Service.GetTareas();
+
+        await JS.InvokeVoidAsync("eval", "document.querySelector('#modalTarea .btn-close').click()");
+    }
+
+    private void PrepararNuevaTarea()
+    {
+        nuevaTarea = new Tarea { FechaInicio = DateTime.Today, FechaFin = DateTime.Today.AddHours(1) };
+    }
+
+    private async Task SeleccionarTarea(Tarea t)
+    {
+        nuevaTarea = new Tarea
+        {
+            Id = t.Id,
+            Titulo = t.Titulo,
+            Descripcion = t.Descripcion,
+            FechaInicio = t.FechaInicio,
+            FechaFin = t.FechaFin,
+            ColorHex = t.ColorHex,
+            CategoriaId = t.CategoriaId
+		};
+    }
+
+    private async Task EliminarTarea()
+    {
+        await Service.DeleteTarea(nuevaTarea.Id);
+
+        tareas = await Service.GetTareas();
+
+        await JS.InvokeVoidAsync("eval", "document.querySelector('#modalTarea .btn-close').click()");
+    }
+
+    private void SetHoraInicio(ChangeEventArgs e)
+    {
+        if (TimeSpan.TryParse(e.Value?.ToString(), out var time))
+        {
+            nuevaTarea.FechaInicio = nuevaTarea.FechaInicio.Date.Add(time);
+        }
+    }
+
+    private void SetHoraFin(ChangeEventArgs e)
+    {
+        if (TimeSpan.TryParse(e.Value?.ToString(), out var time))
+        {
+            nuevaTarea.FechaFin = nuevaTarea.FechaInicio.Date.Add(time);
+        }
+    }
+
+    private void NuevaCategoria()
+    {
+        mostrarNuevaCat = !mostrarNuevaCat;
+        nombreCatNueva = "";
+    }
+
+    private async Task GuardarCategoria()
+    {
+        if (!string.IsNullOrWhiteSpace(nombreCatNueva))
+        {
+            var nuevaCat = new Categoria { Nombre = nombreCatNueva };
+            await Service.SaveCategorias(nuevaCat);
+
+            categorias = await Service.GetCategorias();
+            
+            var catCreada = categorias.LastOrDefault(c => c.Nombre == nombreCatNueva);
+            if (catCreada != null)
+            {
+                nuevaTarea.CategoriaId = catCreada.Id;
+            }
+
+            mostrarNuevaCat = false;
+            nombreCatNueva = "";
+        }
     }
 }

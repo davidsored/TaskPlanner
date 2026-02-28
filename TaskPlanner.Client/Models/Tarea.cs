@@ -23,5 +23,11 @@ namespace TaskPlanner.Client.Models
         public int? CategoriaId { get; set; }
 
         public Categoria? Categoria { get; set; }
+
+        public bool EsRecurrente { get; set; } = false;
+
+        public string? PatronDias { get; set; }
+
+        public DateTime? FechaFinRecurrencia { get; set; }
     }
 }

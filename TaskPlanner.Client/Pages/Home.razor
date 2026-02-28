@@ -6,7 +6,38 @@
 
 <PageTitle>Dashboard Semanal</PageTitle>
 
-<h3>Mi Semana</h3>
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-2 border-info">
+
+    <div class="d-flex align-items-center gap-3">
+        <div class="p-3 bg-info bg-opacity-10 border border-info rounded-end">
+            <h4>Mi Semana</h4>
+        </div>
+
+        <button class="btn btn-outline-info rounded-end shadow-sm p-0"
+                style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;"
+                title="Ir a una fecha específica"
+                onclick="document.getElementById('selectorFechaOculto').showPicker()">
+            <i class="bi bi-calendar-week"></i>
+        </button>
+
+        <input type="date" id="selectorFechaOculto"
+               style="position: absolute; width: 0; height: 0; border: none; padding: 0; visibility: hidden;"
+               @onchange="IrAFecha" />
+    </div>
+
+    <div class="btn-group shadow-sm">
+        <button class="btn btn-outline-info" @onclick="SemanaAnterior">
+            <i class="bi bi-chevron-left"></i>Anterior
+        </button>
+        <button class="btn fw-bold text-white" style="background-color: skyblue;" @onclick="SemanaActual">
+            Hoy
+        </button>
+        <button class="btn btn-outline-info" @onclick="SemanaSiguiente">
+            Siguiente<i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+</div>
+
 <button type="button" class="btn btn-primary fab-button" data-bs-toggle="modal" data-bs-target="#modalTarea" @onclick="PrepararNuevaTarea">
     +
 </button>
@@ -212,6 +243,26 @@ else
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="mb-3 p-3 border rounded shadow-sm bg-light">
+                        <label class="form-label fw-bold">Repetir en otro días</label>
+                        <p class="small text-muted mb-2">Marca los días de la semana en los que quieres que se repita esta tarea.</p>
+
+                        <div class="d-flex gap-2 justify-content-between">
+                            @foreach (var dia in diasRepeticion)
+                            {
+                                var diaActual = dia;
+                                <div @key="diaActual.Nombre">
+                                    <input type="checkbox" class="btn-check" id="btncheck-@diaActual.Nombre" autocomplete="off"
+                                           checked="@diaActual.Seleccionado"
+                                           @onchange="@((ChangeEventArgs e) => diaActual.Seleccionado = (bool)(e.Value ?? false))">
+                                    <label class="btn btn-outline-info rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold;" for="btncheck-@diaActual.Nombre">
+                                        @diaActual.Nombre
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>                    
 
                     <div class="mb-3">
                         <label>Categoría</label>
@@ -315,18 +366,64 @@ else
         if (tareas == null) return new List<Tarea>();
 
         int diasASumar = ((int)dia - (int)DayOfWeek.Monday);
-        if (diasASumar < 0) diasASumar += 7; 
+        if (diasASumar < 0) diasASumar += 7;
+        DateTime fechaDeLaColumna = lunesDeEstaSemana.AddDays(diasASumar).Date;
 
-        DateTime fechaDeLaColumna = lunesDeEstaSemana.AddDays(diasASumar);
+        var tareasNormales = tareas.Where(t => !t.EsRecurrente && t.FechaInicio.Date == fechaDeLaColumna);
 
-        return tareas.Where(t => t.FechaInicio.Date == fechaDeLaColumna.Date).OrderBy(t => t.FechaInicio);
+        string letraDelDia = ObtenerLetraDia(dia);
+
+        var tareasRecurrentes = tareas.Where(t =>
+            t.EsRecurrente &&
+            t.PatronDias != null &&
+            t.PatronDias.Contains(letraDelDia) && 
+            t.FechaInicio.Date <= fechaDeLaColumna && 
+            (t.FechaFinRecurrencia == null || t.FechaFinRecurrencia.Value.Date >= fechaDeLaColumna) 
+        );
+
+        return tareasNormales.Concat(tareasRecurrentes).OrderBy(t => t.FechaInicio.TimeOfDay);
+    }
+
+    private string ObtenerLetraDia(DayOfWeek dia)
+    {
+        return dia switch
+        {
+            DayOfWeek.Monday => "L",
+            DayOfWeek.Tuesday => "M",
+            DayOfWeek.Wednesday => "X",
+            DayOfWeek.Thursday => "J",
+            DayOfWeek.Friday => "V",
+            DayOfWeek.Saturday => "S",
+            DayOfWeek.Sunday => "D",
+            _ => ""
+        };
     }
 
     private async Task CrearTarea()
     {
+        var diasMarcados = diasRepeticion.Where(d => d.Seleccionado).ToList();
+
+        if (diasMarcados.Any())
+        {
+            nuevaTarea.EsRecurrente = true;
+            nuevaTarea.PatronDias = string.Join(",", diasMarcados.Select(d => d.Nombre));
+
+            if (nuevaTarea.FechaFinRecurrencia == null)
+            {
+                nuevaTarea.FechaFinRecurrencia = nuevaTarea.FechaInicio.AddYears(1);
+            }
+        }
+        else
+        {
+            nuevaTarea.EsRecurrente = false;
+            nuevaTarea.PatronDias = null;
+            nuevaTarea.FechaFinRecurrencia = null;
+        }
+
         await Service.SaveTarea(nuevaTarea);
 
         nuevaTarea = new Tarea { FechaInicio = DateTime.Today, FechaFin = DateTime.Today.AddHours(1) };
+        foreach (var dia in diasRepeticion) dia.Seleccionado = false;
 
         tareas = await Service.GetTareas();
 
@@ -336,6 +433,7 @@ else
     private void PrepararNuevaTarea()
     {
         nuevaTarea = new Tarea { FechaInicio = DateTime.Today, FechaFin = DateTime.Today.AddHours(1) };
+        foreach (var dia in diasRepeticion) dia.Seleccionado = false;
     }
 
     private async Task SeleccionarTarea(Tarea t)
@@ -348,8 +446,16 @@ else
             FechaInicio = t.FechaInicio,
             FechaFin = t.FechaFin,
             ColorHex = t.ColorHex,
-            CategoriaId = t.CategoriaId
+            CategoriaId = t.CategoriaId,
+            EsRecurrente = t.EsRecurrente,
+			PatronDias = t.PatronDias,
+			FechaFinRecurrencia = t.FechaFinRecurrencia
 		};
+
+        foreach(var dia in diasRepeticion)
+        {
+            dia.Seleccionado = t.EsRecurrente && !string.IsNullOrEmpty(t.PatronDias) && t.PatronDias.Contains(dia.Nombre);
+        }
     }
 
     private async Task EliminarTarea()
@@ -391,7 +497,7 @@ else
             await Service.SaveCategorias(nuevaCat);
 
             categorias = await Service.GetCategorias();
-            
+
             var catCreada = categorias.LastOrDefault(c => c.Nombre == nombreCatNueva);
             if (catCreada != null)
             {
@@ -400,6 +506,50 @@ else
 
             mostrarNuevaCat = false;
             nombreCatNueva = "";
+        }
+    }
+
+    private void SemanaAnterior()
+    {
+        lunesDeEstaSemana = lunesDeEstaSemana.AddDays(-7);
+    }
+
+    private void SemanaSiguiente()
+    {
+        lunesDeEstaSemana = lunesDeEstaSemana.AddDays(7);
+    }
+
+    private void SemanaActual()
+    {
+        CalcularInicioSemana();
+    }
+
+    public class DiaRepeticion
+    {
+        public string Nombre { get; set; } = "";
+        public DayOfWeek Dia { get; set; }
+        public bool Seleccionado { get; set; }
+    }
+
+    private List<DiaRepeticion> diasRepeticion = new()
+    {
+        new DiaRepeticion {Nombre = "L", Dia = DayOfWeek.Monday},
+        new DiaRepeticion {Nombre = "M", Dia = DayOfWeek.Tuesday},
+        new DiaRepeticion {Nombre = "X", Dia = DayOfWeek.Wednesday},
+        new DiaRepeticion {Nombre = "J", Dia = DayOfWeek.Thursday},
+        new DiaRepeticion {Nombre = "V", Dia = DayOfWeek.Friday},
+        new DiaRepeticion {Nombre = "S", Dia = DayOfWeek.Saturday},
+        new DiaRepeticion {Nombre = "D", Dia = DayOfWeek.Sunday},
+    };
+
+    private void IrAFecha(ChangeEventArgs e)
+    {
+        if(DateTime.TryParse(e.Value?.ToString(), out DateTime fechaSeleccionada))
+        {
+            int diasHastaLunes = ((int)fechaSeleccionada.DayOfWeek - (int)DayOfWeek.Monday);
+            if (diasHastaLunes < 0) diasHastaLunes += 7;
+
+            lunesDeEstaSemana = fechaSeleccionada.AddDays(-diasHastaLunes);
         }
     }
 }

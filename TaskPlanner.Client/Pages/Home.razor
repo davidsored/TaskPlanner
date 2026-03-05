@@ -48,160 +48,67 @@
 }
 else
 {
-    <div class="container-fluid">
-        <div class="row">
-
-            <div class="col border-end">
-                <h5 class="text-center bg-light p-2">
-                    Lunes <br />
+    <div class="d-flex flex-column border border-info border-opacity-25 shadow-sm rounded bg-white" style="height: 75vh; overflow-y: auto; overflow-x: hidden; position: relative;">
+        <div class="d-flex border-bottom border-2 bg-light" style="position: sticky; top: 0; z-index: 10;">
+            <div style="width: 60px; flex-shrink: 0;"></div>
+            @foreach (var day in new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday })
+            {
+                <div class="flex-grow-1 border-start text-center p-2" style="flex-basis: 0;">
+                    <strong class="text-dark">@ObtenerNombreDia(day)</strong><br />
                     <span style="font-size: 0.8rem; color: #666;">
-                        @lunesDeEstaSemana.ToShortDateString()
+                        @GetFechaParaDia(day).ToShortDateString()
                     </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Monday))
+                </div>
+            }
+        </div>
+
+        <div class="d-flex" style="flex-grow: 1; position: relative;">
+            <div style="width: 60px; flex-shrink: 0; background-color: #f8f9fa;">
+                @for (int i = 0; i < 24; i++)
                 {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
+                    <div style="height: 60px; position: relative;">
+                        <span style="position: absolute; top: -10px; right: 8px; font-size: 0.75rem; color: #6c757d; font-weight: bold;">
+                            @i.ToString("00"):00
+                        </span>
                     </div>
                 }
             </div>
-
-            <div class="col border-end">
-                <h5 class="text-center bg-light p-2">
-                    Martes <br />
-                    <span style="font-size: 0.8rem; color: #666">
-						@lunesDeEstaSemana.AddDays(1).ToShortDateString()
-                    </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Tuesday))
+            <div class="d-flex flex-grow-1" style="position: relative;">
+                @foreach (var day in new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday })
                 {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
+                    <div class="flex-grow-1 border-start" style="position: relative; flex-basis: 0;">
+                        @for (int i = 0; i < 24; i++)
+                        {
+                            <div style="height: 60px; border-bottom: 1px solid #e9ecef; box-sizing: border-box;"></div>
+                        }
+
+                        @{
+                            var tareasDelDia = GetTareasPorDia(day).ToList();
+                        }
+
+                        @foreach (var t in tareasDelDia)
+                        {
+                            double topPx = (t.FechaInicio.Hour * 60) + t.FechaInicio.Minute;
+                            double heightPx = (t.FechaFin - t.FechaInicio).TotalMinutes;
+                            if (heightPx < 20) heightPx = 20;
+
+                            var coordenadas = CalcularSolapamiento(t, tareasDelDia);
+
+                            <div class="card position-absolute shadow-sm border-light text-white rounded-2"
+                                 style="top: @(topPx)px; height: @(heightPx)px; left: @(coordenadas.Left); width: @(coordenadas.Width); background-color: @(t.ColorHex ?? "#0d6efd"); cursor: pointer; z-index: 5; overflow: hidden; opacity: 0.95;"
+                                 data-bs-toggle="modal" data-bs-target="#modalTarea"
+                                 @onclick="() => SeleccionarTarea(t)">
+                                <div class="card-body p-1 lh-1">
+                                    <div style="font-size: 0.75rem; font-weight: bold; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">@t.Titulo</div>
+                                    <div style="font-size: 0.65rem; margin-top: 2px;">@t.FechaInicio.ToString("HH:mm")</div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
             </div>
-
-            <div class="col border-end">
-                <h5 class="text-center bg-light p-2">
-                    Miércoles <br />
-                    <span style="font-size: 0.8rem; color: #666">
-                        @lunesDeEstaSemana.AddDays(2).ToShortDateString()
-                    </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Wednesday))
-                {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="col border-end">
-                <h5 class="text-center bg-light p-2">
-                    Jueves <br />
-                    <span style="font-size: 0.8rem; color: #666">
-                        @lunesDeEstaSemana.AddDays(3).ToShortDateString()
-                    </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Thursday))
-                {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="col">
-                <h5 class="text-center bg-light p-2">
-                    Viernes <br />
-                    <span style="font-size: 0.8rem; color: #666">
-                        @lunesDeEstaSemana.AddDays(4).ToShortDateString()
-                    </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Friday))
-                {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="col border-end">
-                <h5 class="text-center bg-light p-2">
-                    Sábado <br />
-                    <span style="font-size: 0.8rem; color: #666">
-                        @lunesDeEstaSemana.AddDays(5).ToShortDateString()
-                    </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Saturday))
-                {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <div class="col border-end">
-                <h5 class="text-center bg-light p-2">
-                    Domingo <br />
-                    <span style="font-size: 0.8rem; color: #666">
-                        @lunesDeEstaSemana.AddDays(6).ToShortDateString()
-                    </span>
-                </h5>
-                @foreach (var t in GetTareasPorDia(DayOfWeek.Sunday))
-                {
-                    <div class="card mb-2 text-white shadow-sm"
-                         style="background-color: @(t.ColorHex ?? "#ccc"); cursor: pointer;"
-                         data-bs-toggle="modal" data-bs-target="#modalTarea"
-                         @onclick="() => SeleccionarTarea(t)">
-                        <div class="card-body p-2">
-                            <strong>@t.Titulo</strong><br />
-                            <small>@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</small>
-                        </div>
-                    </div>
-                }
-            </div>
-
         </div>
     </div>
-
-
 }
 
 <div class="modal fade" id="modalTarea" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -551,5 +458,48 @@ else
 
             lunesDeEstaSemana = fechaSeleccionada.AddDays(-diasHastaLunes);
         }
+    }
+
+    private string ObtenerNombreDia(DayOfWeek dia)
+    {
+        return dia switch
+        {
+            DayOfWeek.Monday => "Lunes",
+            DayOfWeek.Tuesday => "Martes",
+            DayOfWeek.Wednesday => "Miércoles",
+            DayOfWeek.Thursday => "Jueves",
+            DayOfWeek.Friday => "Viernes",
+            DayOfWeek.Saturday => "Sábado",
+            DayOfWeek.Sunday => "Domingo",
+            _ => ""
+        };
+    }
+
+    private DateTime GetFechaParaDia(DayOfWeek dia)
+    {
+        int diasASumar = ((int)dia - (int)DayOfWeek.Monday);
+        if (diasASumar < 0) diasASumar += 7;
+        return lunesDeEstaSemana.AddDays(diasASumar);
+    }
+
+    private (string Width, string Left) CalcularSolapamiento(Tarea tareaActual, List<Tarea> todasLasTareasDelDia)
+    {
+        var solapadas = todasLasTareasDelDia.Where(t =>
+            t.FechaInicio.TimeOfDay < tareaActual.FechaFin.TimeOfDay &&
+            t.FechaFin.TimeOfDay > tareaActual.FechaInicio.TimeOfDay)
+            .OrderBy(t => t.FechaInicio.TimeOfDay)
+            .ThenBy(t => t.Id) 
+            .ToList();
+
+        if (solapadas.Count <= 1)
+        {
+            return ("calc(100% - 4px)", "2px");
+        }
+
+        int posicion = solapadas.IndexOf(tareaActual);
+        double anchoPorcentaje = 100.0 / solapadas.Count;
+        double izquierdaPorcentaje = posicion * anchoPorcentaje;
+
+        return ($"calc({anchoPorcentaje}% - 2px)", $"calc({izquierdaPorcentaje}%)");
     }
 }

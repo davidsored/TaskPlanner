@@ -19,10 +19,13 @@ Una Single Page Application (SPA) full-stack para la gestión avanzada de tareas
 ## 📸 Demostración
 
 **Vista principal (Cuadrícula Semanal):**
-![Vista de la Semana](Imagenes/vista-semana.png)
+<img width="2559" height="1392" alt="vista-semana" src="https://github.com/user-attachments/assets/8d9028e5-89c1-4531-9424-da6e06add439" />
+
 
 **Vista Mensual (Calendario completo):**
-![Vista del Mes](Imagenes/vista-mes.png)
+<img width="2559" height="1386" alt="vista-mes" src="https://github.com/user-attachments/assets/0bf439a1-440e-4ce3-bb15-c1e9d0bdc987" />
+
 
 **Gestión avanzada y creación de tareas recurrentes:**
-![Modal Nueva Tarea](Imagenes/vista-nueva-tarea.png)
+<img width="2557" height="1389" alt="vista-nueva-tarea" src="https://github.com/user-attachments/assets/17e8d4fa-36f8-49f4-bc94-e86d31afabbb" />
+

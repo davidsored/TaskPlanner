@@ -29,5 +29,7 @@ namespace TaskPlanner.Client.Models
         public string? PatronDias { get; set; }
 
         public DateTime? FechaFinRecurrencia { get; set; }
+
+        public string? FechasExcluidas { get; set; }
     }
 }

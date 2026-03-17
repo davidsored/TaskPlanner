@@ -3,6 +3,8 @@
 @using TaskPlanner.Client.Services;
 @inject TaskService Service;
 @inject IJSRuntime JS;
+@inject TaskPlanner.Client.Services.AppState AppState
+@implements IDisposable
 
 <PageTitle>Dashboard Semanal</PageTitle>
 
@@ -109,7 +111,7 @@ else
                                 <div class="card position-absolute shadow-sm border-light text-white rounded-2"
                                      style="top: @(topPx)px; height: @(heightPx)px; left: @(coordenadas.Left); width: @(coordenadas.Width); background-color: @(t.ColorHex ?? "#0d6efd"); cursor: pointer; z-index: 5; overflow: hidden; opacity: 0.95;"
                                      data-bs-toggle="modal" data-bs-target="#modalTarea"
-                                     @onclick="() => SeleccionarTarea(t)">
+                                     @onclick="() => SeleccionarTarea(t, GetFechaParaDia(day))">
 
                                     <div class="card-body p-1 lh-1">
                                         <div style="font-size: 0.75rem; font-weight: bold; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">@t.Titulo</div>
@@ -165,7 +167,8 @@ else
                         <div class="card position-absolute shadow border-light text-white rounded-3"
                              style="top: @(topPx)px; height: @(heightPx)px; left: @(coordenadas.Left); width: @(coordenadas.Width); background-color: @(t.ColorHex ?? "#0d6efd"); cursor: pointer; z-index: 5; overflow: hidden; opacity: 0.95;"
                              data-bs-toggle="modal" data-bs-target="#modalTarea"
-                             @onclick="() => SeleccionarTarea(t)">
+                             @onclick="() => SeleccionarTarea(t, diaVisible)">
+
                             <div class="card-body p-2 lh-1">
                                 <div style="font-size: 0.9rem; font-weight: bold; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">@t.Titulo</div>
                                 <div style="font-size: 0.8rem; margin-top: 4px;">@t.FechaInicio.ToString("HH:mm") - @t.FechaFin.ToString("HH:mm")</div>
@@ -210,7 +213,7 @@ else
                                     <div class="rounded mb-1 px-1 text-white shadow-sm"
                                          style="font-size: 0.7rem; background-color: @(t.ColorHex ?? "#0d6efd"); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5;"
                                          data-bs-toggle="modal" data-bs-target="#modalTarea"
-                                         @onclick="() => SeleccionarTarea(t)"
+                                         @onclick="() => SeleccionarTarea(t, dia)"
                                          title="@t.Titulo">
                                         <strong>@t.FechaInicio.ToString("HH:mm")</strong> @t.Titulo
                                     </div>
@@ -340,9 +343,23 @@ else
                     <div class="d-flex gap-2 mt-4">
                         @if (nuevaTarea.Id != 0)
                         {
-                            <button type="button" class="btn btn-danger w-50 shadow-sm" @onclick="EliminarTarea">
-                                <i class="bi bi-trash"></i> Borrar
-                            </button>
+                            @if (nuevaTarea.EsRecurrente)
+                            {
+                                <div class="d-flex flex-column gap-2 w-50">
+                                    <button type="button" class="btn btn-outline-danger shadow-sm" @onclick="EliminarSoloEstaOcurrencia">
+                                        <i class="bi bi-calendar-x"></i> Borrar solo este día
+                                    </button>
+                                    <button type="button" class="btn btn-danger shadow-sm" @onclick="EliminarTarea">
+                                        <i class="bi bi-trash"></i> Borrar toda la serie
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger w-50 shadow-sm" @onclick="EliminarTarea">
+                                    <i class="bi bi-trash"></i> Borrar
+                                </button>
+                            }
                         }
                         <button type="submit" class="btn btn-success flex-grow-1 shadow-sm">
                             Guardar Tarea
@@ -361,24 +378,39 @@ else
     private DateTime lunesDeEstaSemana;
     private bool mostrarNuevaCat = false;
     private string nombreCatNueva = "";
+    private DateTime? fechaOcurrenciaSeleccionada;
 
     protected override async Task OnInitializedAsync()
     {
         tareas = await Service.GetTareas();
         categorias = await Service.GetCategorias();
 
+        diaVisible = AppState.FechaSeleccionada;
         CalcularInicioSemana();
+
+        AppState.OnChange += SincronizarConEstado;
+    }
+
+    private void SincronizarConEstado()
+    {
+        if (diaVisible.Date != AppState.FechaSeleccionada.Date)
+        {
+            diaVisible = AppState.FechaSeleccionada;
+            CalcularInicioSemana();
+        }
+        InvokeAsync(StateHasChanged); 
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= SincronizarConEstado;
     }
 
     private void CalcularInicioSemana()
     {
-        DateTime hoy = DateTime.Today;
-
-        int diasHastaLunes = ((int)hoy.DayOfWeek - (int)DayOfWeek.Monday);
-
+        int diasHastaLunes = ((int)diaVisible.DayOfWeek - (int)DayOfWeek.Monday);
         if (diasHastaLunes < 0) diasHastaLunes += 7;
-
-        lunesDeEstaSemana = hoy.AddDays(-diasHastaLunes);
+        lunesDeEstaSemana = diaVisible.AddDays(-diasHastaLunes);
     }
 
     private IEnumerable<Tarea> GetTareasPorDia(DayOfWeek dia)
@@ -393,15 +425,20 @@ else
 
         string letraDelDia = ObtenerLetraDia(dia);
 
+        string fechaStr = fechaDeLaColumna.ToString("yyyy-MM-dd");
+
         var tareasRecurrentes = tareas.Where(t =>
             t.EsRecurrente &&
             t.PatronDias != null &&
-            t.PatronDias.Contains(letraDelDia) && 
-            t.FechaInicio.Date <= fechaDeLaColumna && 
-            (t.FechaFinRecurrencia == null || t.FechaFinRecurrencia.Value.Date >= fechaDeLaColumna) 
+            t.PatronDias.Contains(letraDelDia) &&
+            t.FechaInicio.Date <= fechaDeLaColumna &&
+            (t.FechaFinRecurrencia == null || t.FechaFinRecurrencia.Value.Date >= fechaDeLaColumna) &&
+            (t.FechasExcluidas == null || !t.FechasExcluidas.Contains(fechaStr))
         );
 
-        return tareasNormales.Concat(tareasRecurrentes).OrderBy(t => t.FechaInicio.TimeOfDay);
+        return tareasNormales.Concat(tareasRecurrentes)
+            .Where(t => !AppState.CategoriasOcultas.Contains(t.CategoriaId ?? 0))
+            .OrderBy(t => t.FechaInicio.TimeOfDay);
     }
 
     private string ObtenerLetraDia(DayOfWeek dia)
@@ -456,8 +493,10 @@ else
         foreach (var dia in diasRepeticion) dia.Seleccionado = false;
     }
 
-    private async Task SeleccionarTarea(Tarea t)
+    private async Task SeleccionarTarea(Tarea t, DateTime fechaOcurrencia)
     {
+        fechaOcurrenciaSeleccionada = fechaOcurrencia;
+
         nuevaTarea = new Tarea
         {
             Id = t.Id,
@@ -468,11 +507,12 @@ else
             ColorHex = t.ColorHex,
             CategoriaId = t.CategoriaId,
             EsRecurrente = t.EsRecurrente,
-			PatronDias = t.PatronDias,
-			FechaFinRecurrencia = t.FechaFinRecurrencia
-		};
+            PatronDias = t.PatronDias,
+            FechaFinRecurrencia = t.FechaFinRecurrencia,
+            FechasExcluidas = t.FechasExcluidas // NUEVO
+        };
 
-        foreach(var dia in diasRepeticion)
+        foreach (var dia in diasRepeticion)
         {
             dia.Seleccionado = t.EsRecurrente && !string.IsNullOrEmpty(t.PatronDias) && t.PatronDias.Contains(dia.Nombre);
         }
@@ -485,6 +525,29 @@ else
         tareas = await Service.GetTareas();
 
         await JS.InvokeVoidAsync("eval", "document.querySelector('#modalTarea .btn-close').click()");
+    }
+
+    private async Task EliminarSoloEstaOcurrencia()
+    {
+        if (fechaOcurrenciaSeleccionada.HasValue)
+        {
+            string fechaStr = fechaOcurrenciaSeleccionada.Value.ToString("yyyy-MM-dd");
+
+            // La añadimos a la lista negra
+            if (string.IsNullOrEmpty(nuevaTarea.FechasExcluidas))
+            {
+                nuevaTarea.FechasExcluidas = fechaStr;
+            }
+            else if (!nuevaTarea.FechasExcluidas.Contains(fechaStr))
+            {
+                nuevaTarea.FechasExcluidas += "," + fechaStr;
+            }
+
+            await Service.SaveTarea(nuevaTarea);
+
+            tareas = await Service.GetTareas();
+            await JS.InvokeVoidAsync("eval", "document.querySelector('#modalTarea .btn-close').click()");
+        }
     }
 
     private void SetHoraInicio(ChangeEventArgs e)
@@ -658,14 +721,19 @@ else
         var tareasNormales = tareas.Where(t => !t.EsRecurrente && t.FechaInicio.Date == fecha.Date);
         string letraDelDia = ObtenerLetraDia(fecha.DayOfWeek);
 
+        string fechaStr = fecha.ToString("yyyy-MM-dd");
+
         var tareasRecurrentes = tareas.Where(t =>
             t.EsRecurrente &&
             t.PatronDias != null &&
             t.PatronDias.Contains(letraDelDia) &&
             t.FechaInicio.Date <= fecha.Date &&
-            (t.FechaFinRecurrencia == null || t.FechaFinRecurrencia.Value.Date >= fecha.Date)
+            (t.FechaFinRecurrencia == null || t.FechaFinRecurrencia.Value.Date >= fecha.Date) &&
+            (t.FechasExcluidas == null || !t.FechasExcluidas.Contains(fechaStr)) 
         );
 
-        return tareasNormales.Concat(tareasRecurrentes).OrderBy(t => t.FechaInicio.TimeOfDay);
+        return tareasNormales.Concat(tareasRecurrentes)
+            .Where(t => !AppState.CategoriasOcultas.Contains(t.CategoriaId ?? 0))
+            .OrderBy(t => t.FechaInicio.TimeOfDay);
     }
 }

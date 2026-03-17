@@ -11,4 +11,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 
 builder.Services.AddScoped<TaskService>();
 
+builder.Services.AddScoped<TaskPlanner.Client.Services.AppState>();
+
 await builder.Build().RunAsync();

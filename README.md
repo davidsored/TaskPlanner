@@ -18,8 +18,6 @@ Una Single Page Application (SPA) full-stack para la gestión avanzada de tareas
 
 ## 📸 Demostración
 
-## 📸 Demostración
-
 **Vista principal (Cuadrícula Semanal):**
 ![Vista de la Semana](imagenes/vista-semana.png)
 
